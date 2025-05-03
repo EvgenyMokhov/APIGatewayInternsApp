@@ -1,6 +1,6 @@
-﻿using Rabbit.Services;
+﻿using RabbitMQ.Services;
 
-namespace Rabbit
+namespace RabbitMQ
 {
     public class RabbitManager
     {
@@ -8,9 +8,9 @@ namespace Rabbit
         public Projects Projects { get; set; }
         public Directions Directions { get; set; }
         public Users Users { get; set; }
-        public RabbitManager(Interns interns, Projects projects, Directions directions, Users users) 
+        public RabbitManager(Interns interns, Projects projects, Directions directions, Users users)
         {
-            Interns = interns; 
+            Interns = interns;
             Projects = projects;
             Directions = directions;
             Users = users;

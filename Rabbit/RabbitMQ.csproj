@@ -14,8 +14,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="InternsTestModels">
-      <HintPath>..\..\InternsTestModels\InternsTestModels\bin\Debug\net8.0\InternsTestModels.dll</HintPath>
+    <Reference Include="Rabbit">
+      <HintPath>..\..\InternsTestModels\Rabbit\bin\Debug\net8.0\Rabbit.dll</HintPath>
     </Reference>
   </ItemGroup>
 

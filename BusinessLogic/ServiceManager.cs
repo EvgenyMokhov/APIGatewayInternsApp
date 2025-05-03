@@ -1,5 +1,5 @@
-﻿using Rabbit;
-using BusinessLogic.Services;
+﻿using BusinessLogic.Services;
+using RabbitMQ;
 
 namespace BusinessLogic
 {

@@ -1,11 +1,11 @@
-﻿using InternsTestModels.Models.DTOs;
-using InternsTestModels.Models.Rabbit.Interns.Requests;
-using InternsTestModels.Models.Rabbit.Interns.Responses;
-using MassTransit;
+﻿using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Rabbit.Interns;
+using Rabbit.Interns.Requests;
+using Rabbit.Interns.Responses;
 
-namespace Rabbit.Services
+namespace RabbitMQ.Services
 {
     public class Interns
     {
@@ -19,26 +19,26 @@ namespace Rabbit.Services
 
         public async Task CreateInternAsync(InternDto intern, Guid transactionId)
         {
-            IPublishEndpoint publishEndpoint = Provider.GetRequiredService<IPublishEndpoint>();
-            await publishEndpoint.Publish<CreateInternRequest>(new() { RequestData = intern, TransactionId = transactionId });
+            IRequestClient<CreateInternRequest> requestClient = Provider.GetRequiredService<IRequestClient<CreateInternRequest>>();
+            await requestClient.GetResponse<CreateInternResponse>(new() { RequestData = intern, TransactionId = transactionId });
         }
 
         public async Task UpdateInternAsync(InternDto intern, Guid transactionId)
         {
-            IPublishEndpoint publishEndpoint = Provider.GetRequiredService<IPublishEndpoint>();
-            await publishEndpoint.Publish<UpdateInternRequest>(new() { RequestData = intern , TransactionId = transactionId});
+            IRequestClient<UpdateInternRequest> requestClient = Provider.GetRequiredService<IRequestClient<UpdateInternRequest>>();
+            await requestClient.GetResponse<UpdateInternResponse>(new() { RequestData = intern, TransactionId = transactionId });
         }
 
         public async Task<List<InternDto>> GetAllInternsAsync(Guid transactionId)
         {
             IRequestClient<GetAllInternsRequest> requestClient = Provider.GetRequiredService<IRequestClient<GetAllInternsRequest>>();
-            return (await requestClient.GetResponse<GetAllInternsResponse>(new() { TransactionId = transactionId})).Message.ResponseData;
+            return (await requestClient.GetResponse<GetAllInternsResponse>(new() { TransactionId = transactionId })).Message.ResponseData;
         }
 
         public async Task<InternDto> GetInternAsync(Guid id, Guid transactionId)
         {
             IRequestClient<GetInternRequest> requestClient = Provider.GetRequiredService<IRequestClient<GetInternRequest>>();
-            return (await requestClient.GetResponse<GetInternResponse>(new() { Id = id, TransactionId = transactionId})).Message.ResponseData;
+            return (await requestClient.GetResponse<GetInternResponse>(new() { Id = id, TransactionId = transactionId })).Message.ResponseData;
         }
 
         public async Task<List<InternDto>> GetInternsByDirection(Guid directionId, Guid transactionId)
@@ -49,6 +49,7 @@ namespace Rabbit.Services
 
         public async Task<List<InternDto>> GetInternsByProject(Guid projectId, Guid transactionId)
         {
+            using IServiceScope scope = Provider.CreateScope();
             IRequestClient<GetInternsByProjectRequest> requestClient = Provider.GetRequiredService<IRequestClient<GetInternsByProjectRequest>>();
             return (await requestClient.GetResponse<GetInternsByProjectResponse>(new() { ProjectId = projectId, TransactionId = transactionId })).Message.ResponseData;
         }

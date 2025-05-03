@@ -1,11 +1,11 @@
-﻿using InternsTestModels.Models.DTOs;
-using InternsTestModels.Models.Rabbit.Projects.Requests;
-using InternsTestModels.Models.Rabbit.Projects.Responses;
-using MassTransit;
+﻿using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Rabbit.Projects;
+using Rabbit.Projects.Requests;
+using Rabbit.Projects.Responses;
 
-namespace Rabbit.Services
+namespace RabbitMQ.Services
 {
     public class Projects
     {
@@ -19,26 +19,33 @@ namespace Rabbit.Services
 
         public async Task CreateProjectAsync(ProjectDto project, Guid transactionId)
         {
-            IPublishEndpoint publishEndpoint = Provider.GetRequiredService<IPublishEndpoint>();
-            await publishEndpoint.Publish<CreateProjectRequest>(new() { RequestData = project, TransactionId = transactionId });
+            IRequestClient<CreateProjectRequest> requestClient = Provider.GetRequiredService<IRequestClient<CreateProjectRequest>>();
+            await requestClient.GetResponse<CreateProjectResponse>(new() { RequestData = project, TransactionId = transactionId });
         }
 
         public async Task UpdateProjectAsync(ProjectDto project, Guid transactionId)
         {
-            IPublishEndpoint publishEndpoint = Provider.GetRequiredService<IPublishEndpoint>();
-            await publishEndpoint.Publish<UpdateProjectRequest>(new() { RequestData = project, TransactionId = transactionId });
+            IRequestClient<UpdateProjectRequest> requestClient = Provider.GetRequiredService<IRequestClient<UpdateProjectRequest>>();
+            await requestClient.GetResponse<UpdateProjectResponse>(new() { RequestData = project, TransactionId = transactionId });
         }
 
         public async Task<List<ProjectDto>> GetAllProjectsAsync(Guid transactionId)
         {
             IRequestClient<GetAllProjectsRequest> requestClient = Provider.GetRequiredService<IRequestClient<GetAllProjectsRequest>>();
-            return (await requestClient.GetResponse<GetAllProjectsResponse>(new() { TransactionId = transactionId})).Message.ResponseData;
+            return (await requestClient.GetResponse<GetAllProjectsResponse>(new() { TransactionId = transactionId })).Message.ResponseData;
         }
 
         public async Task<ProjectDto> GetProjectAsync(Guid id, Guid transactionId)
         {
             IRequestClient<GetProjectRequest> requestClient = Provider.GetRequiredService<IRequestClient<GetProjectRequest>>();
-            return (await requestClient.GetResponse<GetProjectResponse>(new() { Id = id, TransactionId = transactionId})).Message.ResponseData;
+            try
+            {
+                return (await requestClient.GetResponse<GetProjectResponse>(new() { Id = id, TransactionId = transactionId })).Message.ResponseData;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message.Split(':')[1]);
+            }
         }
     }
 }

@@ -12,12 +12,18 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Rabbit\Rabbit.csproj" />
+    <ProjectReference Include="..\Rabbit\RabbitMQ.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="InternsTestModels">
-      <HintPath>..\..\InternsTestModels\InternsTestModels\bin\Debug\net8.0\InternsTestModels.dll</HintPath>
+    <Reference Include="HttpDtos">
+      <HintPath>..\..\InternsTestModels\HttpDto\bin\Debug\net8.0\HttpDtos.dll</HintPath>
+    </Reference>
+    <Reference Include="Other">
+      <HintPath>..\..\InternsTestModels\HttpDto\bin\Debug\net8.0\Other.dll</HintPath>
+    </Reference>
+    <Reference Include="Rabbit">
+      <HintPath>..\..\InternsTestModels\Rabbit\bin\Debug\net8.0\Rabbit.dll</HintPath>
     </Reference>
   </ItemGroup>
 

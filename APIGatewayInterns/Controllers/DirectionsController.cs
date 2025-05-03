@@ -1,7 +1,7 @@
-﻿using Rabbit;
-using BusinessLogic;
-using InternsTestModels.Models.DTOs;
+﻿using BusinessLogic;
+using HttpDtos;
 using Microsoft.AspNetCore.Mvc;
+using RabbitMQ;
 
 namespace APIGatewayInterns.Controllers
 {
@@ -24,6 +24,17 @@ namespace APIGatewayInterns.Controllers
             return Ok(await ServiceManager.Directions.GetDirectionsAsync(transactionId));
         }
 
+        [HttpPost("get_directions_on_page")]
+        public async Task<IActionResult> GetDirectionsForPage([FromBody] GetPagedDirectionsHttpRequestDto requestData )
+        {
+            Guid transactionId = Guid.NewGuid();
+            if (requestData.PageNumber < 1)
+                return BadRequest("Page number cannot be less than 1");
+            if (requestData.DirectionsCountOnPage < 1)
+                return BadRequest("Count on page cannot be less than 1");
+            return Ok(await ServiceManager.Directions.GetPagedDirectionsAsync(requestData, transactionId));
+        }
+
         [HttpGet("low_detail_all")]
         public async Task<IActionResult> GetLowDetailDirections()
         {
@@ -35,15 +46,21 @@ namespace APIGatewayInterns.Controllers
         public async Task<IActionResult> GetDirection([FromRoute] Guid id)
         {
             Guid transactionId = Guid.NewGuid();
-            return Ok(await ServiceManager.Directions.GetDirectionAsync(id, transactionId));
+            try
+            {
+                return Ok(await ServiceManager.Directions.GetDirectionAsync(id, transactionId));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPost("create")]
-        public async Task<IActionResult> CreateDirection([FromBody] DirectionHttpDto direciton)
+        public async Task<IActionResult> CreateDirection([FromBody] DirectionLowDetailHttpDto direciton)
         {
             Guid transactionId = Guid.NewGuid();
-            await ServiceManager.Directions.CreateDirectionAsync(direciton, transactionId);
-            return Ok();
+            return Ok(await ServiceManager.Directions.CreateDirectionAsync(direciton, transactionId));
         }
 
         [HttpPut("update")]
