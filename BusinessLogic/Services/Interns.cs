@@ -2,6 +2,7 @@
 using Rabbit.Interns;
 using Rabbit.Users;
 using RabbitMQ;
+using RabbitMQ.Services;
 
 namespace BusinessLogic.Services
 {
@@ -80,6 +81,40 @@ namespace BusinessLogic.Services
                     rollbackFunction();
                 throw new(ex.Message);
             }
+        }
+
+        public async Task<List<InternHttpDto>> GetFilteredInternsAsync(Guid projectId, Guid directionId, Guid transactionId)
+        {
+            if (projectId == Guid.Empty && directionId == Guid.Empty)
+                return (await Task.WhenAll(
+                    (await Rabbit.Interns.GetAllInternsAsync(transactionId))
+                    .Select(async intern => await GetInternHttpDto(intern, transactionId))))
+                    .ToList();
+            if (projectId == Guid.Empty)
+            {
+                return (await Task.WhenAll(
+                    (await Rabbit.Interns.GetInternsByDirection(directionId, transactionId))
+                    .Select(async i => await GetInternHttpDto(i, transactionId))))
+                    .ToList();
+            }
+            if (directionId == Guid.Empty)
+            {
+                return (await Task.WhenAll(
+                    (await Rabbit.Interns.GetInternsByProject(projectId, transactionId))
+                    .Select(async i => await GetInternHttpDto(i, transactionId))))
+                    .ToList();
+            }
+            List<InternHttpDto> projFiltered = new();
+            List<InternHttpDto> dirFiltered = new();
+            dirFiltered = (await Task.WhenAll(
+                    (await Rabbit.Interns.GetInternsByDirection(directionId, transactionId))
+                    .Select(async i => await GetInternHttpDto(i, transactionId))))
+                    .ToList();
+            projFiltered = (await Task.WhenAll(
+                    (await Rabbit.Interns.GetInternsByProject(projectId, transactionId))
+                    .Select(async i => await GetInternHttpDto(i, transactionId))))
+                    .ToList();
+            return dirFiltered.Intersect(projFiltered).ToList();
         }
 
         public async Task<InternLowDetailHttpDto> CreateInternLowDetailHttpDto(InternDto intern, Guid transactionId)

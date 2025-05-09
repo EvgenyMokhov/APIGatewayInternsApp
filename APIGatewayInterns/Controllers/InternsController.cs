@@ -41,6 +41,20 @@ namespace APIGatewayInterns.Controllers
             }
         }
 
+        [HttpGet("get_filtered")]
+        public async Task<IActionResult> GetFilteredInterns([FromQuery] Guid projectId, [FromQuery] Guid directionId)
+        {
+            Guid transactionId = Guid.NewGuid();
+            try
+            {
+                return Ok(await ServiceManager.Interns.GetFilteredInternsAsync(projectId, directionId, transactionId));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetIntern([FromRoute] Guid id)
         {
